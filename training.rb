@@ -10,11 +10,16 @@ require 'csv'
 @precision = 10 ** -6
 
 @age = 0
+
+# derivative of our sigmoid function, in terms of the output (i.e. y)
+def dtanh(x)
+  return 1.0 - x**2
+end
  
 CSV.open('archives/training_samples.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
   cvs.each do |row|
     @training_samples << [-1, row[0], row[1], row[2]]
-    @desired_output << row[3]
+    @desired_output << [row[3], row[4], row[5]]
   end
 end
 
@@ -42,7 +47,10 @@ end
 
 begin
   @old_error = @error
-  @training_samples.each_with_index do |ts, si|
+  @training_samples.each_with_index do |ts, ti|
+    
+    #forward
+
     # Preenchendo o cubo I
     @layers.each_with_index do |layer, L|
       layer.times do |j|
@@ -76,7 +84,12 @@ begin
       end
     end
 
+    #backward
+
     #gradiente
     @gradient = []
+    @layers.last.times do |j|
+      @gradient[j] = (@desired_output[j] - @Y[@layers.size-1][ti][j]) * tanh(@I[@layers.size-1][j])
+    end
   end
 end until (@error - @old_error) < @precision
