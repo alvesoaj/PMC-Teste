@@ -131,7 +131,7 @@ begin
       end
     end
 
-    #------------------------------------------------------------------ Calcular erro local
+    #------------------------------------------------------------------ Calcular erro local 
     soma = 0
     @layers.last.times do |j|
       soma += (@desired_output[ti][j] - @Y[@layers.size-1][j]) ** 2
@@ -222,6 +222,9 @@ begin
   
   # -------------------------------------------------------------------------------------------- Contando eras
   @age += 1
+  #puts "Erro: "+@error.to_s+", Antigo: "+@old_error.to_s
+  #puts @synaptic_weights.join(" - ")
+  #puts @errors.join(" - ")
 end until ((@error - @old_error) <= @precision) || @age > 5000
 
 CSV.open("archives/synaptic_weights.csv", "wb") do |csv|
