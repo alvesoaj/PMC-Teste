@@ -4,7 +4,7 @@ require 'csv'
 @desired_output = []
 
 @layers = [15, 3]
-@number_of_entries = 3
+@number_of_entries = 4
 
 @learning_rate = 0.1
 @precision = 10 ** -6
@@ -20,8 +20,8 @@ end
  
 CSV.open('archives/training_samples.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
   cvs.each do |row|
-    @training_samples << [-1, row[0], row[1], row[2]]
-    @desired_output << [row[3], row[4], row[5]]
+    @training_samples << [-1, row[0], row[1], row[2], row[3]]
+    @desired_output << [row[4], row[5], row[6]]
   end
 end
 
@@ -131,6 +131,13 @@ begin
       end
     end
 
+    #------------------------------------------------------------------ Calcular erro local
+    soma = 0
+    @layers.last.times do |j|
+      soma += (@desired_output[ti][j] - @Y[@layers.size-1][j]) ** 2
+    end
+    @errors[ti] = soma / 2
+
     #------------------------------------------------------------------------------------------------- backward
     @gradient = []
 
@@ -192,25 +199,18 @@ begin
     end
 
     #------------------------------------------------------------------------------------------- Obtendo Y último atualizado
-    _L = @layers.size - 1
-    @layers.last.times do |j|
-      @I[_L][j] = 0
-      @layers[_L-1].times do |i|
-        @I[_L][j] += @synaptic_weights[_L][j][i] * @Y[_L-1][j]
-      end
-    end
+    #_L = @layers.size - 1
+    #@layers.last.times do |j|
+    #  @I[_L][j] = 0
+    #  @layers[_L-1].times do |i|
+    #    @I[_L][j] += @synaptic_weights[_L][j][i] * @Y[_L-1][j]
+    #  end
+    #end
 
     #matriz Y
-    @layers.last.times do |j|
-      @Y[_L][j] = Math.tanh(@I[_L][j])
-    end
-
-    #------------------------------------------------------------------ Calcular erro local
-    soma = 0
-    @layers.last.times do |j|
-      soma += (@desired_output[ti][j] - @Y[@layers.size-1][j]) ** 2
-    end
-    @errors[ti] = soma / 2
+    #@layers.last.times do |j|
+    #  @Y[_L][j] = Math.tanh(@I[_L][j])
+    #end
   end
   
   # -------------------------------------------------------------------------------------------- Calculando erro
@@ -232,6 +232,4 @@ CSV.open("archives/synaptic_weights.csv", "wb") do |csv|
   end
 end
 
-@layers[@layers.size-1].times do |j|
-  puts @Y[@layers.size-1][j]
-end
+puts "Pesos salvos com sucesso!"
