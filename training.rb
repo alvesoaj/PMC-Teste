@@ -62,6 +62,8 @@ begin
   @old_error = @error
   @errors = []
 
+  puts @synaptic_weights.join(" - ")
+
   @training_samples.each_with_index do |ts, ti|
     #------------------------------------------------------------------------------------------------ forward
     # Preenchendo as matrizes I e Y
@@ -82,8 +84,8 @@ begin
         #matriz Y
         neuro = []
         neuro << -1
-        (1..layer).each do |j|
-          neuro << Math.tanh(@I[_L][j-1])
+        layer.times do |j|
+          neuro << Math.tanh(@I[_L][j])
         end
 
         @Y << neuro
@@ -123,8 +125,8 @@ begin
         #matriz Y
         neuro = []
         neuro << -1
-        (1..layer).each do |j|
-          neuro << Math.tanh(@I[_L][j-1])
+        layer.times do |j|
+          neuro << Math.tanh(@I[_L][j])
         end
 
         @Y << neuro
@@ -223,8 +225,8 @@ begin
   # -------------------------------------------------------------------------------------------- Contando eras
   @age += 1
   #puts "Erro: "+@error.to_s+", Antigo: "+@old_error.to_s
-  #puts @synaptic_weights.join(" - ")
   #puts @errors.join(" - ")
+  #puts @I.join(" - ")
 end until ((@error - @old_error) <= @precision) || @age > 5000
 
 CSV.open("archives/synaptic_weights.csv", "wb") do |csv|
