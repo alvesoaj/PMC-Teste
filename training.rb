@@ -14,8 +14,16 @@ require 'csv'
 @error = 0.0
 
 # derivative of our sigmoid function, in terms of the output (i.e. y)
-def dtanh(x)
-  return 1.0 - x**2
+#def dtanh(x)
+#  return 1.0 - x**2
+#end
+
+def derivada_sigmoid(val_fun)
+    return 0.5 * (funcao_sigmoid(val_fun)) * (1- funcao_sigmoid(val_fun))
+end
+
+def funcao_sigmoid(valor)
+    return 1/(1 + (Math::E ** (-1)*(0.5 * valor)))
 end
  
 CSV.open('archives/training_samples.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
@@ -86,7 +94,8 @@ begin
         neuro = []
         neuro << -1
         layer.times do |j|
-          neuro << Math.tanh(@I[_L][j])
+          #neuro << Math.tanh(@I[_L][j])
+          neuro << funcao_sigmoid(@I[_L][j])
         end
 
         @Y << neuro
@@ -106,7 +115,8 @@ begin
         #matriz Y
         neuro = []
         layer.times do |j|
-          neuro << Math.tanh(@I[_L][j])
+          #neuro << Math.tanh(@I[_L][j])
+          neuro << funcao_sigmoid(@I[_L][j])
         end
 
         @Y << neuro
@@ -127,7 +137,8 @@ begin
         neuro = []
         neuro << -1
         layer.times do |j|
-          neuro << Math.tanh(@I[_L][j])
+          #neuro << Math.tanh(@I[_L][j])
+          neuro << funcao_sigmoid(@I[_L][j])
         end
 
         @Y << neuro
@@ -151,7 +162,8 @@ begin
         #gradiente
         neuro = []
         @layers[_L].times do |j|
-          neuro << (@desired_output[ti][j] - @Y[_L][j]) * dtanh(@I[_L][j])
+          #neuro << (@desired_output[ti][j] - @Y[_L][j]) * dtanh(@I[_L][j])
+          neuro << (@desired_output[ti][j] - @Y[_L][j]) * derivada_sigmoid(@I[_L][j])
         end
 
         @gradient[_L] = neuro
@@ -171,7 +183,8 @@ begin
           @layers[_L+1].times do |k|
             soma += @gradient[_L+1][k] * @synaptic_weights[_L+1][k][j]
           end
-          neuro << soma * dtanh(@I[_L][j])
+          #neuro << soma * dtanh(@I[_L][j])
+          neuro << soma * derivada_sigmoid(@I[_L][j])
         end
 
         @gradient[_L] = neuro
@@ -190,7 +203,8 @@ begin
           @layers[_L+1].times do |k|
             soma += @gradient[_L+1][k] * @synaptic_weights[_L+1][k][j]
           end
-          neuro << soma * dtanh(@I[_L][j])
+          #neuro << soma * dtanh(@I[_L][j])
+          neuro << soma * derivada_sigmoid(@I[_L][j])
         end
 
         @gradient[_L] = neuro
@@ -229,10 +243,10 @@ begin
   
   # -------------------------------------------------------------------------------------------- Contando eras
   @age += 1
-  puts "Erro: "+@error.to_s+", Antigo: "+@old_error.to_s
+  #puts "Erro: "+@error.to_s+", Antigo: "+@old_error.to_s
   #puts @errors.join(" - ")
   #puts @I.join(" - ")
-end until ((@error - @old_error) <= @precision) || @age > 3
+end until ((@error - @old_error).abs <= @precision) || @age > 10000
 
 CSV.open("archives/synaptic_weights.csv", "wb") do |csv|
   @layers.each_with_index do |layer, _L|
