@@ -54,17 +54,18 @@ end
   @synaptic_weights << neuro
 end
 
-@I = []
-@Y = []
-
 begin
   puts "Entrando na era: "+@age.to_s
   @old_error = @error
   @errors = []
 
-  puts @synaptic_weights.join(" - ")
+  #puts @synaptic_weights.join(" - ")
 
   @training_samples.each_with_index do |ts, ti|
+    @I = []
+    @Y = []
+    @gradient = []
+
     #------------------------------------------------------------------------------------------------ forward
     # Preenchendo as matrizes I e Y
     @layers.each_with_index do |layer, _L|
@@ -94,7 +95,7 @@ begin
         neuro = []
         layer.times do |j|
           soma = 0
-          @layers[_L-1].times do |i|
+          (@layers[_L-1] + 1).times do |i|
             soma += @synaptic_weights[_L][j][i] * @Y[_L-1][j]
           end
           neuro << soma
@@ -114,7 +115,7 @@ begin
         neuro = []
         layer.times do |j|
           soma = 0
-          @layers[_L-1].times do |i|
+          (@layers[_L-1] + 1).times do |i|
             soma += @synaptic_weights[_L][j][i] * @Y[_L-1][j]
           end
           neuro << soma
@@ -135,14 +136,16 @@ begin
 
     #------------------------------------------------------------------ Calcular erro local 
     soma = 0
+    #puts @I[@layers.size-1].join(" , ")
+    #puts @Y[@layers.size-1].join(" , ")
     @layers.last.times do |j|
+      #puts @desired_output[ti][j].to_s+" - "+@Y[@layers.size-1][j].to_s
       soma += (@desired_output[ti][j] - @Y[@layers.size-1][j]) ** 2
     end
     @errors[ti] = soma / 2
 
     #------------------------------------------------------------------------------------------------- backward
-    @gradient = []
-
+    #puts @Y[1].join(" - ")
     (@layers.size-1).downto 0 do |_L|
       if _L == (@layers.size - 1) #--------------------------------- _L último
         #gradiente
@@ -156,6 +159,7 @@ begin
         #ajustando pesos sinápticos
         @layers[_L].times do |j|
           (@layers[_L-1] + 1).times do |i|
+            #puts @gradient[_L][j].to_s+" - "+@Y[_L-1][i].to_s
             @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
           end
         end
@@ -218,16 +222,17 @@ begin
   # -------------------------------------------------------------------------------------------- Calculando erro
   soma = 0
   @training_samples.size.times do |k|
+    #puts @errors[k]
     soma += @errors[k]
   end
   @error = soma / @training_samples.size
   
   # -------------------------------------------------------------------------------------------- Contando eras
   @age += 1
-  #puts "Erro: "+@error.to_s+", Antigo: "+@old_error.to_s
+  puts "Erro: "+@error.to_s+", Antigo: "+@old_error.to_s
   #puts @errors.join(" - ")
   #puts @I.join(" - ")
-end until ((@error - @old_error) <= @precision) || @age > 5000
+end until ((@error - @old_error) <= @precision) || @age > 3
 
 CSV.open("archives/synaptic_weights.csv", "wb") do |csv|
   @layers.each_with_index do |layer, _L|
