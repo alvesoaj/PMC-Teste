@@ -9,6 +9,8 @@ require 'csv'
 @learning_rate = 0.1
 @precision = 10 ** -6
 
+@momentum = 0.9
+
 @age = 0
 
 @error = 0.0
@@ -22,6 +24,7 @@ def derivada_sigmoid(val_fun)
     return 0.5 * (funcao_sigmoid(val_fun)) * (1- funcao_sigmoid(val_fun))
 end
 
+# g(u) = 1/(1+e^(-bu)) Função Logistica
 def funcao_sigmoid(valor)
     return 1/(1 + (Math::E ** (-1)*(0.5 * valor)))
 end
@@ -33,41 +36,57 @@ CSV.open('archives/training_samples.csv', 'r', {:col_sep => ',', :converters => 
   end
 end
 
+@ws = []
 @synaptic_weights = []
+@null_synaptic_weights = []
 
 @layers.each_with_index do |layer, _L|
   #puts "layer: "+_L.to_s
   neuro = []
+  null_neuro = []
 	if _L == 0
     layer.times do |j|
       #puts "neuronio: "+j.to_s
       entry = []
+      null_entry = []
       (@number_of_entries + 1).times do |i|
         #puts "entrada: "+i.to_s
         entry << rand
+        null_entry << 0
       end
       neuro << entry
+      null_neuro << null_entry
     end
 	else
     layer.times do |j|
       #puts "neuronio: "+j.to_s
       entry = []
+      null_entry = []
       (@layers[_L-1] + 1).times do |i|
         #puts "entrada: "+i.to_s
 				entry << rand
+        null_entry << 0
 			end
       neuro << entry
+      null_neuro << null_entry
     end
   end
   @synaptic_weights << neuro
+  @null_synaptic_weights << null_neuro
 end
+
+@ws << @null_synaptic_weights
+@ws << @null_synaptic_weights
+
+@synaptic_weights = []
+@synaptic_weights = @null_synaptic_weights
 
 begin
   puts "Entrando na era: "+@age.to_s
   @old_error = @error
   @errors = []
 
-  #puts @synaptic_weights.join(" - ")
+  puts @synaptic_weights.join(" - ")
 
   @training_samples.each_with_index do |ts, ti|
     @I = []
@@ -172,6 +191,7 @@ begin
         @layers[_L].times do |j|
           (@layers[_L-1] + 1).times do |i|
             #puts @gradient[_L][j].to_s+" - "+@Y[_L-1][i].to_s
+            #@synaptic_weights[_L][j][i] = @ws[ti-1][_L][j][i] + @momentum * (@ws[ti-1][_L][j][i].to_f - @ws[ti-2][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
             @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
           end
         end
@@ -192,6 +212,7 @@ begin
         #ajustando pesos sinápticos
         @layers[_L].times do |j|
           (@number_of_entries + 1).times do |i|
+            #@synaptic_weights[_L][j][i] = @ws[ti-1][_L][j][i] + @momentum * (@ws[ti-1][_L][j][i].to_f - @ws[ti-2][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * ts[i]
             @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * ts[i]
           end
         end
@@ -212,6 +233,7 @@ begin
         #ajustando pesos sinápticos
         @layers[_L].times do |j|
           (@layers[_L-1] + 1).times do |i|
+            #@synaptic_weights[_L][j][i] = @ws[ti-1][_L][j][i] + @momentum * (@ws[ti-1][_L][j][i].to_f - @ws[ti-2][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
             @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
           end
         end
@@ -231,6 +253,9 @@ begin
     #@layers.last.times do |j|
     #  @Y[_L][j] = Math.tanh(@I[_L][j])
     #end
+
+    @ws[0] = @ws[1]
+    @ws[1] = @synaptic_weights
   end
   
   # -------------------------------------------------------------------------------------------- Calculando erro
@@ -243,10 +268,10 @@ begin
   
   # -------------------------------------------------------------------------------------------- Contando eras
   @age += 1
-  #puts "Erro: "+@error.to_s+", Antigo: "+@old_error.to_s
+  puts "Erro: "+@error.to_s
   #puts @errors.join(" - ")
   #puts @I.join(" - ")
-end until ((@error - @old_error).abs <= @precision) || @age > 10000
+end until ((@error - @old_error).abs <= @precision) || (@age > 10000)
 
 CSV.open("archives/synaptic_weights.csv", "wb") do |csv|
   @layers.each_with_index do |layer, _L|
