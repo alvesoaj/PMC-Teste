@@ -78,15 +78,16 @@ end
 @ws << @null_synaptic_weights
 @ws << @null_synaptic_weights
 
-@synaptic_weights = []
-@synaptic_weights = @null_synaptic_weights
+#puts @ws[1].join(" - ")
+
+@error_arch = CSV.open("archives/errors.csv", "wb")
 
 begin
   puts "Entrando na era: "+@age.to_s
   @old_error = @error
   @errors = []
 
-  puts @synaptic_weights.join(" - ")
+  #puts @synaptic_weights.join(" - ")
 
   @training_samples.each_with_index do |ts, ti|
     @I = []
@@ -191,7 +192,7 @@ begin
         @layers[_L].times do |j|
           (@layers[_L-1] + 1).times do |i|
             #puts @gradient[_L][j].to_s+" - "+@Y[_L-1][i].to_s
-            #@synaptic_weights[_L][j][i] = @ws[ti-1][_L][j][i] + @momentum * (@ws[ti-1][_L][j][i].to_f - @ws[ti-2][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
+            #@synaptic_weights[_L][j][i] = @ws[0][_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
             @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
           end
         end
@@ -212,7 +213,7 @@ begin
         #ajustando pesos sinápticos
         @layers[_L].times do |j|
           (@number_of_entries + 1).times do |i|
-            #@synaptic_weights[_L][j][i] = @ws[ti-1][_L][j][i] + @momentum * (@ws[ti-1][_L][j][i].to_f - @ws[ti-2][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * ts[i]
+            #@synaptic_weights[_L][j][i] = @ws[0][_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * ts[i]
             @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * ts[i]
           end
         end
@@ -233,7 +234,7 @@ begin
         #ajustando pesos sinápticos
         @layers[_L].times do |j|
           (@layers[_L-1] + 1).times do |i|
-            #@synaptic_weights[_L][j][i] = @ws[ti-1][_L][j][i] + @momentum * (@ws[ti-1][_L][j][i].to_f - @ws[ti-2][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
+            #@synaptic_weights[_L][j][i] = @ws[0][_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
             @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
           end
         end
@@ -254,8 +255,8 @@ begin
     #  @Y[_L][j] = Math.tanh(@I[_L][j])
     #end
 
-    @ws[0] = @ws[1]
-    @ws[1] = @synaptic_weights
+    @ws[1] = @ws[0]
+    @ws[0] = @synaptic_weights
   end
   
   # -------------------------------------------------------------------------------------------- Calculando erro
@@ -269,6 +270,7 @@ begin
   # -------------------------------------------------------------------------------------------- Contando eras
   @age += 1
   puts "Erro: "+@error.to_s
+  @error_arch << [@error]
   #puts @errors.join(" - ")
   #puts @I.join(" - ")
 end until ((@error - @old_error).abs <= @precision) || (@age > 10000)
