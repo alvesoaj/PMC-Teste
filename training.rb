@@ -7,9 +7,9 @@ require 'csv'
 @number_of_entries = 2
 
 @learning_rate = 0.1
-@precision = 10 ** -6
+@precision = 10 ** -8
 
-@momentum = 0.0
+@momentum = 0.9
 
 @age = 0
 
@@ -30,7 +30,7 @@ def funcao_sigmoid(valor)
 end
 
 def get_training_and_output
-  CSV.open('archives/training_samples.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
+  CSV.open('archives/training_samples_xor.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
     cvs.each do |row|
       @training_samples << [-1, row[0], row[1]]
       @desired_output << [row[2]]
@@ -211,9 +211,8 @@ begin
         #ajustando pesos sinápticos
         @layers[_L].times do |j|
           (@layers[_L-1] + 1).times do |i|
-            #puts @gradient[_L][j].to_s+" - "+@Y[_L-1][i].to_s
-            #@synaptic_weights[_L][j][i] = @ws[0][_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
-            @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
+            @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
+            #@synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
             #puts @synaptic_weights[_L][j][i].to_s+" | "+@learning_rate.to_s+" | "+@gradient[_L][j].to_s+" | "+@Y[_L-1][i].to_s
           end
         end
@@ -235,8 +234,8 @@ begin
         #ajustando pesos sinápticos
         @layers[_L].times do |j|
           (@number_of_entries + 1).times do |i|
-            #@synaptic_weights[_L][j][i] = @ws[0][_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * ts[i]
-            @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * ts[i]
+            @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * ts[i]
+            #@synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * ts[i]
             #puts @synaptic_weights[_L][j][i].to_s+" | "+@learning_rate.to_s+" | "+@gradient[_L][j].to_s+" | "+ts[i].to_s
           end
         end
@@ -257,8 +256,8 @@ begin
         #ajustando pesos sinápticos
         @layers[_L].times do |j|
           (@layers[_L-1] + 1).times do |i|
-            #@synaptic_weights[_L][j][i] = @ws[0][_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
-            @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
+            @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
+            #@synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
           end
         end
       end
@@ -296,7 +295,7 @@ begin
   #puts @error.to_s+" | "+@old_error.to_s
   #puts @errors.join(" - ")
   #puts @I.join(" - ")
-end until ((@error - @old_error).abs <= @precision) || (@age > 10000)
+end until ((@error - @old_error).abs <= @precision) || (@age > 100000)
 
 CSV.open("archives/synaptic_weights.csv", "wb") do |csv|
   @layers.each_with_index do |layer, _L|

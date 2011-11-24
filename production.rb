@@ -39,7 +39,7 @@ end
 
 @tabela = []
 
-CSV.open('archives/tabela.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
+CSV.open('archives/tabela_xor.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
   cvs.each do |row|
     @tabela << [-1, row[0], row[1]]
   end
@@ -131,6 +131,6 @@ end
     end
   end
 
-  puts @Y[@layers.size-1].join(" | ")
+  #puts @Y[@layers.size-1].join(" | ")
   puts result.join(" | ")
 end
