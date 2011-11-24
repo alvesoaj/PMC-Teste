@@ -3,38 +3,45 @@ require 'csv'
 @training_samples = []
 @desired_output = []
 
-@layers = [15, 3]
-@number_of_entries = 4
+@layers = [3, 1]
+@number_of_entries = 2
 
 @learning_rate = 0.1
 @precision = 10 ** -6
 
-@momentum = 0.9
+@momentum = 0.0
 
 @age = 0
 
 @error = 0.0
 
 # derivative of our sigmoid function, in terms of the output (i.e. y)
-#def dtanh(x)
-#  return 1.0 - x**2
-#end
+def dtanh(x)
+  return 1.0 - x**2
+end
 
 def derivada_sigmoid(val_fun)
-    return 0.5 * (funcao_sigmoid(val_fun)) * (1- funcao_sigmoid(val_fun))
+    return 0.5 * (funcao_sigmoid(val_fun)) * (1 - funcao_sigmoid(val_fun))
 end
 
 # g(u) = 1/(1+e^(-bu)) Função Logistica
 def funcao_sigmoid(valor)
-    return 1/(1 + (Math::E ** (-1)*(0.5 * valor)))
+    return 1/(1 + (Math::E ** (-1 * 0.5 * valor)))
 end
- 
-CSV.open('archives/training_samples.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
-  cvs.each do |row|
-    @training_samples << [-1, row[0], row[1], row[2], row[3]]
-    @desired_output << [row[4], row[5], row[6]]
+
+def get_training_and_output
+  CSV.open('archives/training_samples.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
+    cvs.each do |row|
+      @training_samples << [-1, row[0], row[1]]
+      @desired_output << [row[2]]
+    end
   end
 end
+
+get_training_and_output
+
+#puts @training_samples.map{ |x| x.join(" | ")}
+#puts @desired_output.map{ |x| x.join(" | ")}
 
 @ws = []
 @synaptic_weights = []
@@ -78,7 +85,9 @@ end
 @ws << @null_synaptic_weights
 @ws << @null_synaptic_weights
 
-#puts @ws[1].join(" - ")
+#puts @synaptic_weights.map{ |l| l.map{ |x| x.join(" | ")}}
+#puts @null_synaptic_weights.map{ |l| l.map{ |x| x.join(" | ")}}
+#puts @ws.map{ |y| y.map{|l| l.map{ |x| x.join(" | ")}}}
 
 @error_arch = CSV.open("archives/errors.csv", "wb")
 
@@ -104,6 +113,7 @@ begin
           soma = 0
           (@number_of_entries + 1).times do |i|
             soma += @synaptic_weights[_L][j][i] * ts[i]
+            #puts soma.to_s+" | "+@synaptic_weights[_L][j][i].to_s+" | "+ts[i].to_s
           end
           neuro << soma
         end
@@ -116,6 +126,7 @@ begin
         layer.times do |j|
           #neuro << Math.tanh(@I[_L][j])
           neuro << funcao_sigmoid(@I[_L][j])
+          puts funcao_sigmoid(@I[_L][j])  
         end
 
         @Y << neuro
@@ -125,7 +136,8 @@ begin
         layer.times do |j|
           soma = 0
           (@layers[_L-1] + 1).times do |i|
-            soma += @synaptic_weights[_L][j][i] * @Y[_L-1][j]
+            soma += @synaptic_weights[_L][j][i] * @Y[_L-1][i]
+            #puts soma.to_s+" | "+@synaptic_weights[_L][j][i].to_s+" | "+@Y[_L-1][i].to_s
           end
           neuro << soma
         end
@@ -146,7 +158,7 @@ begin
         layer.times do |j|
           soma = 0
           (@layers[_L-1] + 1).times do |i|
-            soma += @synaptic_weights[_L][j][i] * @Y[_L-1][j]
+            soma += @synaptic_weights[_L][j][i] * @Y[_L-1][i]
           end
           neuro << soma
         end
@@ -164,6 +176,9 @@ begin
         @Y << neuro
       end
     end
+
+    #puts @I.map{|x| x.join(" | ")}
+    #puts @Y.map{|x| x.join(" | ")} 
 
     #------------------------------------------------------------------ Calcular erro local 
     soma = 0
@@ -269,8 +284,8 @@ begin
   
   # -------------------------------------------------------------------------------------------- Contando eras
   @age += 1
-  puts "Erro: "+@error.to_s
   @error_arch << [@error]
+  puts @error.to_s+" | "+@old_error.to_s
   #puts @errors.join(" - ")
   #puts @I.join(" - ")
 end until ((@error - @old_error).abs <= @precision) || (@age > 10000)

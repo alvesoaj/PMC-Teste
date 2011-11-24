@@ -1,7 +1,7 @@
 require 'csv'
 
-@layers = [15, 3]
-@number_of_entries = 4
+@layers = [3, 1]
+@number_of_entries = 2
 
 #   0.8622, 0.7101, 0.6236, 0.7894
 
@@ -35,7 +35,7 @@ end
 
 CSV.open('archives/tabela.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
   cvs.each do |row|
-    @tabela << [row[0], row[1], row[2], row[3]]
+    @tabela << [row[0], row[1]]
   end
 end
 
