@@ -10,36 +10,43 @@ require 'csv'
 #inputs = string.split(",")
 
 @synaptic_weights = []
+
+# g(u) = 1/(1+e^(-bu)) Função Logistica
+def funcao_sigmoid(valor)
+    return 1/(1 + (Math::E ** (-1 * 0.5 * valor)))
+end
  
 csv = CSV.open('archives/synaptic_weights.csv', 'r', {:col_sep => ',', :converters => :float}).to_a
 
-csv.size.times do |i| 
-  @layers.each_with_index do |layer, _L|
-    #puts "layer: "+_L.to_s
-    neuro = []
-    soma = 0
-    (0..(_L-1)).each do |t|
-      soma += @layers[t]
-    end
-    layer.times do |j|
-      #puts "neuronio: "+j.to_s
-      entry = []
-      entry = csv[soma+j]
-      neuro << entry
-    end
-    @synaptic_weights << neuro
+
+@layers.each_with_index do |layer, _L|
+  #puts "layer: "+_L.to_s
+  neuro = []
+  soma = 0
+  (0..(_L-1)).each do |t|
+    soma += @layers[t]
   end
+  layer.times do |j|
+    #puts "neuronio: "+j.to_s
+    entry = []
+    entry = csv[soma+j]
+    neuro << entry
+  end
+  @synaptic_weights << neuro
 end
+
+#puts @synaptic_weights.map{|x| x.map{ |y| y.join(" | ")}}.to_s
 
 @tabela = []
 
 CSV.open('archives/tabela.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
   cvs.each do |row|
-    @tabela << [row[0], row[1]]
+    @tabela << [-1, row[0], row[1]]
   end
 end
 
 @tabela.each do |inputs|
+  #puts inputs.join(" | ")
   @I = []
   @Y = []
 
@@ -52,7 +59,8 @@ end
       layer.times do |j|
         soma = 0
         (@number_of_entries + 1).times do |i|
-          soma += @synaptic_weights[_L][j][i] * inputs[i].to_f
+          #puts @synaptic_weights[_L][j][i]
+          soma += @synaptic_weights[_L][j][i] * inputs[i]
         end
         neuro << soma
       end
@@ -62,8 +70,9 @@ end
       #matriz Y
       neuro = []
       neuro << -1
-      (1..layer).each do |j|
-        neuro << Math.tanh(@I[_L][j-1])
+      layer.times do |j|
+        #neuro << Math.tanh(@I[_L][j-1])
+        neuro << funcao_sigmoid(@I[_L][j])
       end
 
       @Y << neuro
@@ -72,8 +81,8 @@ end
       neuro = []
       layer.times do |j|
         soma = 0
-        @layers[_L-1].times do |i|
-          soma += @synaptic_weights[_L][j][i] * @Y[_L-1][j]
+        (@layers[_L-1] + 1).times do |i|
+          soma += @synaptic_weights[_L][j][i] * @Y[_L-1][i]
         end
         neuro << soma
       end
@@ -83,7 +92,8 @@ end
       #matriz Y
       neuro = []
       layer.times do |j|
-        neuro << Math.tanh(@I[_L][j])
+        #neuro << Math.tanh(@I[_L][j])
+        neuro << funcao_sigmoid(@I[_L][j])
       end
 
       @Y << neuro
@@ -92,8 +102,8 @@ end
       neuro = []
       layer.times do |j|
         soma = 0
-        @layers[_L-1].times do |i|
-          soma += @synaptic_weights[_L][j][i] * @Y[_L-1][j]
+        (@layers[_L-1] + 1).times do |i|
+          soma += @synaptic_weights[_L][j][i] * @Y[_L-1][i]
         end
         neuro << soma
       end
@@ -103,8 +113,9 @@ end
       #matriz Y
       neuro = []
       neuro << -1
-      (1..layer).each do |j|
-        neuro << Math.tanh(@I[_L][j-1])
+      layer.times do |j|
+        #neuro << Math.tanh(@I[_L][j-1])
+        neuro << funcao_sigmoid(@I[_L][j])
       end
 
       @Y << neuro

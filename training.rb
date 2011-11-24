@@ -85,6 +85,8 @@ end
 @ws << @null_synaptic_weights
 @ws << @null_synaptic_weights
 
+#@null_synaptic_weights = Array.new @null_synaptic_weights
+
 #puts @synaptic_weights.map{ |l| l.map{ |x| x.join(" | ")}}
 #puts @null_synaptic_weights.map{ |l| l.map{ |x| x.join(" | ")}}
 #puts @ws.map{ |y| y.map{|l| l.map{ |x| x.join(" | ")}}}
@@ -126,7 +128,7 @@ begin
         layer.times do |j|
           #neuro << Math.tanh(@I[_L][j])
           neuro << funcao_sigmoid(@I[_L][j])
-          puts funcao_sigmoid(@I[_L][j])  
+          #puts funcao_sigmoid(@I[_L][j])  
         end
 
         @Y << neuro
@@ -149,6 +151,7 @@ begin
         layer.times do |j|
           #neuro << Math.tanh(@I[_L][j])
           neuro << funcao_sigmoid(@I[_L][j])
+          #puts funcao_sigmoid(@I[_L][j])
         end
 
         @Y << neuro
@@ -202,6 +205,8 @@ begin
         end
 
         @gradient[_L] = neuro
+        #puts @gradient[_L].join(" | ")
+    
 
         #ajustando pesos sinápticos
         @layers[_L].times do |j|
@@ -209,6 +214,7 @@ begin
             #puts @gradient[_L][j].to_s+" - "+@Y[_L-1][i].to_s
             #@synaptic_weights[_L][j][i] = @ws[0][_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
             @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
+            #puts @synaptic_weights[_L][j][i].to_s+" | "+@learning_rate.to_s+" | "+@gradient[_L][j].to_s+" | "+@Y[_L-1][i].to_s
           end
         end
       elsif _L == 0 #-------------------------------------------------- _L primeiro
@@ -224,12 +230,14 @@ begin
         end
 
         @gradient[_L] = neuro
+        #puts @gradient[_L].join(" | ")
 
         #ajustando pesos sinápticos
         @layers[_L].times do |j|
           (@number_of_entries + 1).times do |i|
             #@synaptic_weights[_L][j][i] = @ws[0][_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * ts[i]
             @synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @learning_rate * @gradient[_L][j] * ts[i]
+            #puts @synaptic_weights[_L][j][i].to_s+" | "+@learning_rate.to_s+" | "+@gradient[_L][j].to_s+" | "+ts[i].to_s
           end
         end
       else #--------------------------------------------------------- _L intermediários
@@ -285,7 +293,7 @@ begin
   # -------------------------------------------------------------------------------------------- Contando eras
   @age += 1
   @error_arch << [@error]
-  puts @error.to_s+" | "+@old_error.to_s
+  #puts @error.to_s+" | "+@old_error.to_s
   #puts @errors.join(" - ")
   #puts @I.join(" - ")
 end until ((@error - @old_error).abs <= @precision) || (@age > 10000)
