@@ -1,7 +1,7 @@
 require 'csv'
 
-@layers = [3, 1]
-@number_of_entries = 2
+@layers = [15, 3]
+@number_of_entries = 4
 
 #   0.8622, 0.7101, 0.6236, 0.7894
 
@@ -39,9 +39,9 @@ end
 
 @tabela = []
 
-CSV.open('archives/tabela_xor.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
+CSV.open('archives/tabela.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
   cvs.each do |row|
-    @tabela << [-1, row[0], row[1]]
+    @tabela << [-1, row[0], row[1], row[2], row[3]]
   end
 end
 

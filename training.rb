@@ -3,8 +3,8 @@ require 'csv'
 @training_samples = []
 @desired_output = []
 
-@layers = [3, 1]
-@number_of_entries = 2
+@layers = [15, 3]
+@number_of_entries = 4
 
 @learning_rate = 0.1
 @precision = 10 ** -8
@@ -30,10 +30,10 @@ def funcao_sigmoid(valor)
 end
 
 def get_training_and_output
-  CSV.open('archives/training_samples_xor.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
+  CSV.open('archives/training_samples.csv', 'r', {:col_sep => ',', :converters => :float}) do |cvs|
     cvs.each do |row|
-      @training_samples << [-1, row[0], row[1]]
-      @desired_output << [row[2]]
+      @training_samples << [-1, row[0], row[1], row[2], row[3]]
+      @desired_output << [row[4], row[5], row[6]]
     end
   end
 end
