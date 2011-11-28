@@ -3,7 +3,7 @@ require 'csv'
 @training_samples = []
 @desired_output = []
 
-@layers = [3, 1]
+@layers = [6, 1]
 @number_of_entries = 2
 
 @learning_rate = 0.1
@@ -180,19 +180,6 @@ begin
       end
     end
 
-    #puts @I.map{|x| x.join(" | ")}
-    #puts @Y.map{|x| x.join(" | ")} 
-
-    #------------------------------------------------------------------ Calcular erro local 
-    soma = 0
-    #puts @I[@layers.size-1].join(" , ")
-    #puts @Y[@layers.size-1].join(" , ")
-    @layers.last.times do |j|
-      #puts @desired_output[ti][j].to_s+" - "+@Y[@layers.size-1][j].to_s
-      soma += (@desired_output[ti][j] - @Y[@layers.size-1][j]) ** 2
-    end
-    @errors[ti] = soma / 2
-
     #------------------------------------------------------------------------------------------------- backward
     #puts @Y[1].join(" - ")
     (@layers.size-1).downto 0 do |_L|
@@ -282,16 +269,103 @@ begin
   end
   
   # -------------------------------------------------------------------------------------------- Calculando erro
-  soma = 0
+  
+  #puts @I.map{|x| x.join(" | ")}
+  #puts @Y.map{|x| x.join(" | ")}
+
+  soma_tot = 0
   @training_samples.size.times do |k|
-    #puts @errors[k]
-    soma += @errors[k]
+    @all_I = []
+    @all_Y = []
+    #------------------------------------------------------------------------------------------------ forward
+    # Preenchendo as matrizes I e Y
+    @layers.each_with_index do |layer, _L|
+      if _L == 0 #-------------------------------------------------- _L primeiro
+        #matriz I
+        neuro = []
+        layer.times do |j|
+          soma = 0
+          (@number_of_entries + 1).times do |i|
+            soma += @synaptic_weights[_L][j][i] * @training_samples[k][i]
+            #puts soma.to_s+" | "+@synaptic_weights[_L][j][i].to_s+" | "+ts[i].to_s
+          end
+          neuro << soma
+        end
+
+        @all_I << neuro
+
+        #matriz Y
+        neuro = []
+        neuro << -1
+        layer.times do |j|
+          #neuro << Math.tanh(@I[_L][j])
+          neuro << funcao_sigmoid(@I[_L][j])
+          #puts funcao_sigmoid(@I[_L][j])  
+        end
+
+        @all_Y << neuro
+      elsif _L == (@layers.size - 1) #--------------------------------- _L último
+        #matriz I
+        neuro = []
+        layer.times do |j|
+          soma = 0
+          (@layers[_L-1] + 1).times do |i|
+            soma += @synaptic_weights[_L][j][i] * @Y[_L-1][i]
+            #puts soma.to_s+" | "+@synaptic_weights[_L][j][i].to_s+" | "+@Y[_L-1][i].to_s
+          end
+          neuro << soma
+        end
+
+        @all_I << neuro
+
+        #matriz Y
+        neuro = []
+        layer.times do |j|
+          #neuro << Math.tanh(@I[_L][j])
+          neuro << funcao_sigmoid(@I[_L][j])
+          #puts funcao_sigmoid(@I[_L][j])
+        end
+
+        @all_Y << neuro
+      else #--------------------------------------------------------- _L intermediários
+        #matriz I
+        neuro = []
+        layer.times do |j|
+          soma = 0
+          (@layers[_L-1] + 1).times do |i|
+            soma += @synaptic_weights[_L][j][i] * @Y[_L-1][i]
+          end
+          neuro << soma
+        end
+
+        @all_I << neuro
+
+        #matriz Y
+        neuro = []
+        neuro << -1
+        layer.times do |j|
+          #neuro << Math.tanh(@I[_L][j])
+          neuro << funcao_sigmoid(@I[_L][j])
+        end
+
+        @all_Y << neuro
+      end
+    end
+    #------------------------------------------------------------------ Calcular erro local 
+    soma = 0
+    #puts @I[@layers.size-1].join(" , ")
+    #puts @Y[@layers.size-1].join(" , ")
+    @layers.last.times do |j|
+      #puts @desired_output[ti][j].to_s+" - "+@Y[@layers.size-1][j].to_s
+      soma += (@desired_output[k][j] - @all_Y[@layers.size-1][j]) ** 2
+    end
+    soma_tot += soma / 2
   end
-  @error = soma / @training_samples.size
+  @error = soma_tot / @training_samples.size
   
   # -------------------------------------------------------------------------------------------- Contando eras
   @age += 1
-  @error_arch << [@error]
+  @error_arch << [(@error - @old_error).abs]
   #puts @error.to_s+" | "+@old_error.to_s
   #puts @errors.join(" - ")
   #puts @I.join(" - ")

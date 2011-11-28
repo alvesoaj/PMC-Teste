@@ -1,6 +1,6 @@
 require 'csv'
 
-@layers = [3, 1]
+@layers = [6, 1]
 @number_of_entries = 2
 
 #   0.8622, 0.7101, 0.6236, 0.7894
