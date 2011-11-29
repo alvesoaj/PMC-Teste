@@ -1,5 +1,7 @@
-require "/home/zerokol/Projects/Ruby/PMC-Teste/NeuralNetwork.rb"
+require Dir.getwd+"/NeuralNetwork.rb"
 
 nn = NeuralNetwork::PMC.new
 
-nn.init_synaptic_weights
+nn.set_training_samples()
+
+nn.train()
