@@ -4,7 +4,7 @@ require Dir.getwd+"/NeuralNetwork.rb"
 number_of_entries = 4
 layers = [15, 3]
 learning_rate = 0.1
-precision = 10 ** -8
+precision = 10 ** -6
 momentum = 0.9
 
 nn = NeuralNetwork::PMC.new(number_of_entries, layers, learning_rate, precision, momentum)

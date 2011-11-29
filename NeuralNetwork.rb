@@ -238,7 +238,6 @@ module NeuralNetwork
 
 			   soma = 0
 			   @layers.last.times do |j|
-			   	#puts @desired_output[ti][j].to_s+" - "+@Y[@layers.size-1][j].to_s
 			   	soma += (@desired_output[ti][j] - @Y[@layers.size-1][j]) ** 2
 			   end
 			   soma_tot += soma / 2
