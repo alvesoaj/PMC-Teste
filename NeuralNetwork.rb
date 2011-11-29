@@ -26,7 +26,7 @@ module NeuralNetwork
 	  	attr_accessor :number_of_entries, :layers, :learning_rate, :precision, :momentum
 
 	 
-	  	def initialize(number_of_entries = 2, layers = [2,1], learning_rate = 0.1, precision = 10 ** -8, momentum = 0.9)
+	  	def initialize(number_of_entries = 2, layers = [2,1], learning_rate = 0.1, precision = 10 ** -10, momentum = 0.0)
 	   	@number_of_entries = number_of_entries
 	   	@layers = layers
 	   	@learning_rate = learning_rate
@@ -73,7 +73,7 @@ module NeuralNetwork
 			@ws[1] = @null_synaptic_weights.clone
 	  	end
 
-	  	def set_training_samples(ts = [[-1,0,1],[-1,0,0],[-1,1,0],[-1,1,1]], des_o = [[1],[0],[1],[0]])
+	  	def set_training_and_otput_samples(ts = [[-1,0,1],[-1,0,0],[-1,1,0],[-1,1,1]], des_o = [[1],[0],[1],[0]])
 	  		@training_samples = ts
 	  		@desired_output = des_o
 	  	end
@@ -119,6 +119,7 @@ module NeuralNetwork
 			    	end
 			  	end
 
+			  	puts @Y[@layers.size-1].join(" | ")
 			  	puts result.join(" | ")
 			end
 	  	end
