@@ -26,7 +26,7 @@ module NeuralNetwork
 	  	attr_accessor :number_of_entries, :layers, :learning_rate, :precision, :momentum
 
 	 
-	  	def initialize(number_of_entries = 2, layers = [2,1], learning_rate = 0.1, precision = 10 ** -8, momentum = 0.0)
+	  	def initialize(number_of_entries = 2, layers = [2,1], learning_rate = 0.1, precision = 10 ** -8, momentum = 0.9)
 	   	@number_of_entries = number_of_entries
 	   	@layers = layers
 	   	@learning_rate = learning_rate
@@ -101,6 +101,26 @@ module NeuralNetwork
 
 			  	error = get_error()
 			end until ((error - old_error).abs <= @precision) || (age > 100000)
+	  	end
+
+	  	def production(entries = [[-1,0,1],[-1,0,0],[-1,1,0],[-1,1,1]])
+	  		entries.each do |inputs|
+			  	@I = Array.new
+	  			@Y = Array.new
+
+	  			forward(inputs)
+
+			  	result = Array.new
+			  	@layers[@layers.size-1].times do |j|
+			   	if @Y[@layers.size-1][j] >= 0.5
+			   		result << 1
+			    	else
+			      	result << 0
+			    	end
+			  	end
+
+			  	puts result.join(" | ")
+			end
 	  	end
 
 	  	def forward(training_sample)

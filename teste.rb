@@ -5,3 +5,5 @@ nn = NeuralNetwork::PMC.new
 nn.set_training_samples()
 
 nn.train()
+
+nn.production()
