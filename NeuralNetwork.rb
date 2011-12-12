@@ -26,10 +26,10 @@ module NeuralNetwork
 	end
 
 	class PMC
-	  	# attr_accessor :number_of_entries, :layers, :learning_rate, :precision, :momentum
+	  	attr_accessor :number_of_entries, :layers, :learning_rate, :precision, :momentum
 
 	 
-	  	def initialize(number_of_entries = 2, layers = [2,1], learning_rate = 0.5, precision = 10 ** -10, momentum = 0.1)
+	  	def initialize(number_of_entries = 2, layers = [2,1], learning_rate = 0.1, precision = 10 ** -5, momentum = 0.0)
 	   	@number_of_entries = number_of_entries
 	   	@layers = layers
 	   	@learning_rate = learning_rate
@@ -275,7 +275,7 @@ module NeuralNetwork
 		        	#ajustando pesos sinápticos
 		        	@layers[_L].times do |j|
 		         	(@layers[_L-1] + 1).times do |i|
-		            	@synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
+		            	@synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + (@momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f)) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
 		          	end
 		        	end
 		      elsif _L == 0 #-------------------------------------------------- _L primeiro
@@ -292,7 +292,7 @@ module NeuralNetwork
 		        	#ajustando pesos sinápticos
 		        	@layers[_L].times do |j|
 		         	(@number_of_entries + 1).times do |i|
-		            	@synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * training_sample[i]
+		            	@synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + (@momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f)) + @learning_rate * @gradient[_L][j] * training_sample[i]
 		          	end
 		        	end
 		      else #--------------------------------------------------------- _L intermediários
@@ -309,7 +309,7 @@ module NeuralNetwork
 		        	#ajustando pesos sinápticos
 		        	@layers[_L].times do |j|
 		         	(@layers[_L-1] + 1).times do |i|
-		            	@synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + @momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
+		            	@synaptic_weights[_L][j][i] = @synaptic_weights[_L][j][i] + (@momentum * (@ws[0][_L][j][i].to_f - @ws[1][_L][j][i].to_f)) + @learning_rate * @gradient[_L][j] * @Y[_L-1][i]
 		          	end
 		        	end
 		      end
