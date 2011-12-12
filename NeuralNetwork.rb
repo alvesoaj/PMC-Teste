@@ -1,5 +1,8 @@
 # encoding: utf-8
 module NeuralNetwork
+	
+	require 'csv'
+
 	FUNC_ADJ = 0.5
 
 	# Função tangente hiperbôlica
@@ -23,10 +26,10 @@ module NeuralNetwork
 	end
 
 	class PMC
-	  	attr_accessor :number_of_entries, :layers, :learning_rate, :precision, :momentum
+	  	# attr_accessor :number_of_entries, :layers, :learning_rate, :precision, :momentum
 
 	 
-	  	def initialize(number_of_entries = 2, layers = [2,1], learning_rate = 0.1, precision = 10 ** -10, momentum = 0.0)
+	  	def initialize(number_of_entries = 2, layers = [2,1], learning_rate = 0.5, precision = 10 ** -10, momentum = 0.1)
 	   	@number_of_entries = number_of_entries
 	   	@layers = layers
 	   	@learning_rate = learning_rate
@@ -73,9 +76,53 @@ module NeuralNetwork
 			@ws[1] = @null_synaptic_weights.clone
 	  	end
 
-	  	def set_training_and_otput_samples(ts = [[-1,0,1],[-1,0,0],[-1,1,0],[-1,1,1]], des_o = [[1],[0],[1],[0]])
-	  		@training_samples = ts
-	  		@desired_output = des_o
+	  	def get_synaptic_weights()
+	  		csv = CSV.open('archives/synaptic_weights.csv', 'r', {:col_sep => ',', :converters => :float}).to_a
+
+	  		@synaptic_weights = Array.new
+
+			@layers.each_with_index do |layer, _L|
+				neuro = []
+				soma = 0
+				(0..(_L-1)).each do |t|
+					soma += @layers[t]
+				end
+
+				layer.times do |j|
+					entry = []
+					entry = csv[soma+j]
+					neuro << entry
+				end
+				@synaptic_weights << neuro
+			end
+	  	end
+
+	  	def set_training_and_output_samples(path = nil)
+	  		if path.nil?
+	  			training_samples = [[-1,0,1],[-1,0,0],[-1,1,0],[-1,1,1]]
+	  			desired_output = [[1],[0],[1],[0]]
+	  		else
+		  		training_samples = Array.new
+				desired_output = Array.new
+				CSV.open(Dir.getwd+"/"+path, 'r', {:col_sep => ',', :converters => :float}) do |cvs|
+					cvs.each do |row|
+						line = Array.new
+						line << -1
+						@number_of_entries.times do |i|
+							line << row[i]
+						end
+				   	training_samples << line
+
+				   	line = Array.new
+				   	@layers.last.times do |i|
+				   		line << row[@number_of_entries+i]
+				   	end
+				   	desired_output << line
+				 	end
+				end
+			end
+	  		@training_samples = training_samples
+	  		@desired_output = desired_output
 	  	end
 
 	  	def train()
@@ -83,8 +130,16 @@ module NeuralNetwork
 	  		error = 0
 	  		old_error = 0
 
+	  		time = Time.now
+
+	  		error_arch = CSV.open("archives/errors.csv", "wb")
+	  		puts "Iniciando treinamento"
+
 	  		begin
-			  	puts "Entrando na era: "+age.to_s
+	  			if (age % 100) == 0 && age > 0
+				  	puts "Entrando na era: "+age.to_s
+				  	puts (error - old_error).abs
+				end
 			  	old_error = error
 
 			  	@training_samples.each_with_index do |ts, ti|
@@ -100,10 +155,45 @@ module NeuralNetwork
 			  	age += 1
 
 			  	error = get_error()
+			  	error_arch << [(error - old_error).abs]
 			end until ((error - old_error).abs <= @precision) || (age > 100000)
+
+			puts "Treinamento finalizado em "+(Time.now - time).to_i.to_s+" segundos na era "+age.to_s+". Pesos salvos com sucesso!"
+
+			CSV.open("archives/synaptic_weights.csv", "wb") do |csv|
+				@layers.each_with_index do |layer, _L|
+			   	layer.times do |j|
+			      	csv << @synaptic_weights[_L][j]
+			    	end
+			 	end
+			end
 	  	end
 
-	  	def production(entries = [[-1,0,1],[-1,0,0],[-1,1,0],[-1,1,1]])
+	  	def production(value = nil, load_weights = true)
+	  		if load_weights
+	  			puts "Carregando pessos sinàpticos do arquivo."
+	  			get_synaptic_weights()
+	  		end
+
+	  		if value.nil?
+	  			entries = [[-1,0,1],[-1,0,0],[-1,1,0],[-1,1,1]]
+	  		elsif (value.is_a? Array)
+	  			entries = value
+	  		else
+	  			entries = Array.new
+				CSV.open(Dir.getwd+"/"+value, 'r', {:col_sep => ',', :converters => :float}) do |cvs|
+				  	cvs.each do |row|
+				  		line = Array.new
+						line << -1
+						@number_of_entries.times do |i|
+							line << row[i]
+						end
+				   	entries << line
+				  	end
+				end
+	  		end
+
+	  		puts "Produção:"
 	  		entries.each do |inputs|
 			  	@I = Array.new
 	  			@Y = Array.new
