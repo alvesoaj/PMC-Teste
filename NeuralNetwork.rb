@@ -29,7 +29,7 @@ module NeuralNetwork
 	  	attr_accessor :number_of_entries, :layers, :learning_rate, :precision, :momentum
 
 	 
-	  	def initialize(number_of_entries = 2, layers = [2,1], learning_rate = 0.1, precision = 10 ** -5, momentum = 0.0)
+	  	def initialize(number_of_entries = 2, layers = [2,1], learning_rate = 0.1, precision = 10 ** -10, momentum = 0.7)
 	   	@number_of_entries = number_of_entries
 	   	@layers = layers
 	   	@learning_rate = learning_rate
